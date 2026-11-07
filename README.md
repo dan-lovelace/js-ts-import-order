@@ -8,10 +8,8 @@ import child_process from "child_process";
 import fs from "node:fs";
 import path from "node:path";
 
-// priority
-import react from "react";
-
 // external
+import react from "react"; // priority
 import Typography from "@mui/material/Typography";
 import bootstrap from "bootstrap";
 
