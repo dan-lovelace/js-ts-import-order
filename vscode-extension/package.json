@@ -1,0 +1,47 @@
+{
+  "name": "js-ts-import-order",
+  "displayName": "JS/TS Import Order",
+  "description": "Groups and sorts JS/TS imports.",
+  "version": "0.1.0",
+  "publisher": "dan-lovelace",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Formatters",
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "jsTsImports.sort",
+        "title": "Sort Imports (JS/TS)"
+      }
+    ],
+    "codeActions": [
+      {
+        "languages": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "actions": [
+          {
+            "kind": "source.jsTsImports",
+            "title": "Sort imports (JS/TS)",
+            "description": "Group and sort imports: built-ins, external, internal, relative by distance."
+          }
+        ]
+      }
+    ]
+  }
+}
