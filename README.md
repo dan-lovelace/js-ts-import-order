@@ -9,9 +9,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 // external
-import react from "react"; // priority
+import React from "react"; // priority
 import Typography from "@mui/material/Typography";
-import bootstrap from "bootstrap";
+import Bootstrap from "bootstrap";
 
 // internal
 import auth from "@packages/auth";
