@@ -16,7 +16,6 @@ interface Span {
 interface Item {
   text: string;
   spec: string;
-  sideEffect: boolean;
   start: number;
   end: number;
 }
@@ -274,7 +273,6 @@ export function sortImports(
     items.push({
       text: code.slice(start, end),
       spec: node.source.value,
-      sideEffect: node.specifiers.length === 0,
       start,
       end,
     });
@@ -283,19 +281,7 @@ export function sortImports(
 
   const eol = code.includes("\r\n") ? "\r\n" : "\n";
   const matchers = compileConfig(config);
-
-  const segments: string[] = [];
-  for (let i = 0; i < items.length; ) {
-    let j = i;
-    while (j < items.length && items[j].sideEffect === items[i].sideEffect) j++;
-    const run = items.slice(i, j);
-    segments.push(
-      items[i].sideEffect
-        ? run.map((x) => x.text).join(eol)
-        : renderGroups(run, matchers, eol),
-    );
-    i = j;
-  }
+  const sorted = renderGroups(items, matchers, eol);
 
   // Whatever follows the block (const, type, export, a comment, ...) must be
   // separated from the last import by a blank line.
@@ -305,5 +291,5 @@ export function sortImports(
     tail = eol + eol + tail.slice(gap.length);
   }
 
-  return code.slice(0, items[0].start) + segments.join(eol + eol) + tail;
+  return code.slice(0, items[0].start) + sorted + tail;
 }

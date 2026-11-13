@@ -105,13 +105,34 @@ test("external patterns win over internal ones", () => {
   );
 });
 
-test("side-effect imports stay in place and split the sorting", () => {
-  const out = run(
-    `import z from "z";\nimport b from "b";\nimport "reflect-metadata";\nimport y from "y";\nimport a from "a";\n`,
+test("side-effect imports sort alphabetically within their classification group", () => {
+  const c = resolveConfig({
+    internal: ["@acme/*"],
+    priority: ["react"],
+  });
+
+  const out = sortImports(
+    `import z from "z";
+import "@acme/polyfill";
+import "reflect-metadata";
+import react from "react";
+import a from "a";
+import "@acme/core";
+`,
+    c,
+    "a.ts",
   );
+
   assert.equal(
     out,
-    `import b from "b";\nimport z from "z";\n\nimport "reflect-metadata";\n\nimport a from "a";\nimport y from "y";\n`,
+    `import react from "react";
+import a from "a";
+import "reflect-metadata";
+import z from "z";
+
+import "@acme/core";
+import "@acme/polyfill";
+`,
   );
 });
 
@@ -170,7 +191,7 @@ test("CRLF line endings are kept", () => {
   );
   assert.equal(
     out,
-    `import b from "b";\r\n\r\nimport "./x";\r\n\r\nimport a from "a";\r\n`,
+    `import a from "a";\r\nimport b from "b";\r\n\r\nimport "./x";\r\n`,
   );
 });
 
