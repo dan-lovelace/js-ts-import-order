@@ -2,7 +2,7 @@
   "name": "js-ts-import-order",
   "displayName": "JS/TS Import Order",
   "description": "Groups and sorts JS/TS imports.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "dan-lovelace",
   "license": "MIT",
   "engines": {
