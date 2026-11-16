@@ -264,3 +264,48 @@ test("separation works for const, comments, CRLF, and leaves existing gaps and E
   assert.equal(run(`import a from "a";\n`), `import a from "a";\n`);
   assert.equal(run(`import a from "a";`), `import a from "a";`);
 });
+
+test("named specifiers are sorted, layout preserved", () => {
+  const src = `import {
+  createRootRoute,
+  lazyRouteComponent,
+  createRoute,
+  createRouter,
+} from "@tanstack/react-router";
+`;
+  assert.equal(
+    run(src),
+    `import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  lazyRouteComponent,
+} from "@tanstack/react-router";
+`,
+  );
+  assert.equal(run(run(src)), run(src));
+});
+
+test("specifiers: single line, default + named, aliases, inline type", () => {
+  assert.equal(
+    run(`import { c, b, a } from "x";\n`),
+    `import { a, b, c } from "x";\n`,
+  );
+  assert.equal(
+    run(`import React, { useState, useEffect } from "react";\n`),
+    `import React, { useEffect, useState } from "react";\n`,
+  );
+  assert.equal(
+    run(`import { b as a, a as z } from "x";\n`),
+    `import { a as z, b as a } from "x";\n`,
+  );
+  assert.equal(
+    run(`import { type B, a } from "x";\n`),
+    `import { a, type B } from "x";\n`,
+  );
+});
+
+test("imports with comments between specifiers are left alone", () => {
+  const src = `import {\n  b, // keep\n  a,\n} from "x";\n`;
+  assert.equal(run(src), src);
+});

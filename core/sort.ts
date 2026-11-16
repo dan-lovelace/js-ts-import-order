@@ -1,7 +1,7 @@
 import * as path from "node:path";
 
 import { parse, type ParserPlugin } from "@babel/parser";
-import type { ImportDeclaration } from "@babel/types";
+import type { ImportDeclaration, ImportSpecifier } from "@babel/types";
 
 import { DEFAULT_CONFIG, type ImportOrderConfig } from "./config";
 
@@ -201,6 +201,42 @@ function attachedCommentStart(
   return start;
 }
 
+const specifierKey = (s: ImportSpecifier) =>
+  s.imported.type === "Identifier" ? s.imported.name : s.imported.value;
+
+function sortSpecifiers(
+  code: string,
+  node: ImportDeclaration,
+  comments: Span[],
+): string {
+  const text = code.slice(node.start!, node.end!);
+  const specs = node.specifiers.filter(
+    (s): s is ImportSpecifier => s.type === "ImportSpecifier",
+  );
+  if (specs.length < 2) return text;
+
+  const first = specs[0].start!;
+  const last = specs[specs.length - 1].end!;
+  if (comments.some((c) => c.start < last && c.end > first)) return text;
+
+  const sorted = [...specs].sort(
+    (a, b) =>
+      compareText(specifierKey(a), specifierKey(b)) ||
+      compareText(a.local.name, b.local.name),
+  );
+  if (sorted.every((s, i) => s === specs[i])) return text;
+
+  let body = "";
+  let pos = first;
+  specs.forEach((slot, i) => {
+    body +=
+      code.slice(pos, slot.start!) +
+      code.slice(sorted[i].start!, sorted[i].end!);
+    pos = slot.end!;
+  });
+  return code.slice(node.start!, first) + body + code.slice(last, node.end!);
+}
+
 // ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
@@ -270,8 +306,10 @@ export function sortImports(
     if (code.slice(end, newline === -1 ? code.length : newline).trim() !== "")
       return code;
 
+    const sortedNode = sortSpecifiers(code, node, comments);
     items.push({
-      text: code.slice(start, end),
+      text:
+        code.slice(start, nodeStart) + sortedNode + code.slice(nodeEnd, end),
       spec: node.source.value,
       start,
       end,
